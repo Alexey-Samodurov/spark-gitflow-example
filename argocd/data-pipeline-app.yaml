@@ -13,7 +13,7 @@ spec:
 
   source:
     # Замените на реальный URL вашего репозитория
-    repoURL: https://github.com/YOUR_ORG/spark-gitflow-example.git
+    repoURL: https://github.com/Alexey-Samodurov/spark-gitflow-example
     targetRevision: master
     path: jobs/data-pipeline
     helm:
