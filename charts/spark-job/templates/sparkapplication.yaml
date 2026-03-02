@@ -65,7 +65,6 @@ spec:
     {{- end }}
     labels:
       {{- include "spark-job.selectorLabels" . | nindent 6 }}
-      spark-role: driver
       {{- with .Values.driver.labels }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
@@ -128,7 +127,6 @@ spec:
     {{- end }}
     labels:
       {{- include "spark-job.selectorLabels" . | nindent 6 }}
-      spark-role: executor
       {{- with .Values.executor.labels }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
