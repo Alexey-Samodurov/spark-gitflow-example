@@ -101,6 +101,9 @@ restartPolicy:
   onSubmissionFailureRetries: 5
   onSubmissionFailureRetryInterval: 20
 
+# Time (in seconds) to keep completed SparkApplication and its pods before cleanup. 0 = delete immediately.
+timeToLiveSeconds: ""
+
 # ─────────────────────────────────────────────
 # Service account (created by this chart)
 # ─────────────────────────────────────────────

@@ -20,6 +20,10 @@ spec:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 
+  {{- if or .Values.timeToLiveSeconds (eq (toString .Values.timeToLiveSeconds) "0") }}
+  timeToLiveSeconds: {{ .Values.timeToLiveSeconds }}
+  {{- end }}
+
   {{- if .Values.job.mainClass }}
   mainClass: {{ .Values.job.mainClass | quote }}
   {{- end }}
