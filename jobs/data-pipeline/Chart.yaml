@@ -8,4 +8,4 @@ dependencies:
   - name: spark-job
     version: "0.1.0"
     repository: "file://../../charts/spark-job"
-    alias: sparkJob
+    alias: sparkjob
