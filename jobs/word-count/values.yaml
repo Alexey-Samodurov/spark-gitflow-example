@@ -4,7 +4,7 @@ sparkjob:
     tag: "3.5.0-scala2.12-java11-python3-ubuntu"
     pullPolicy: IfNotPresent
 
-  timeToLiveSeconds: 60
+  timeToLiveSeconds: ""
 
   job:
     type: Scala
