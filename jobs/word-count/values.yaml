@@ -9,8 +9,6 @@ sparkjob:
     sparkVersion: "3.5.0"
     mainClass: org.apache.spark.examples.JavaWordCount
     mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.12-3.5.0.jar"
-    arguments:
-      - "local:///opt/spark/README.md"
 
   driver:
     cores: 1
