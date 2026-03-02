@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: spark-data-pipeline
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: spark-gitflow
+    spark-job: data-pipeline
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: spark-jobs
+
+  source:
+    # Замените на реальный URL вашего репозитория
+    repoURL: https://github.com/YOUR_ORG/spark-gitflow-example.git
+    targetRevision: master
+    path: jobs/data-pipeline
+    helm:
+      valueFiles:
+        - values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: spark-jobs
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

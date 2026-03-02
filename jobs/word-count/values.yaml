@@ -1,0 +1,38 @@
+sparkJob:
+  image:
+    repository: apache/spark
+    tag: "3.5.0"
+    pullPolicy: IfNotPresent
+
+  job:
+    type: Scala
+    sparkVersion: "3.5.0"
+    mainClass: org.apache.spark.examples.JavaWordCount
+    mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.12-3.5.0.jar"
+    arguments:
+      - "local:///opt/spark/README.md"
+
+  driver:
+    cores: 1
+    coreLimit: "1200m"
+    memory: "512m"
+
+  executor:
+    instances: 1
+    cores: 1
+    coreLimit: "1200m"
+    memory: "512m"
+
+  sparkConf:
+    spark.ui.enabled: "false"
+    spark.sql.shuffle.partitions: "10"
+
+  restartPolicy:
+    type: OnFailure
+    onFailureRetries: 3
+    onFailureRetryInterval: 10
+    onSubmissionFailureRetries: 5
+    onSubmissionFailureRetryInterval: 20
+
+  serviceAccount:
+    create: true

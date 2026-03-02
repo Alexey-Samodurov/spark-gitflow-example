@@ -1,0 +1,139 @@
+# ─────────────────────────────────────────────
+# Global / metadata
+# ─────────────────────────────────────────────
+nameOverride: ""
+fullnameOverride: ""
+
+## Namespace is controlled by ArgoCD destination; set here only for local helm install
+namespace: ""
+
+# ─────────────────────────────────────────────
+# Container image
+# ─────────────────────────────────────────────
+image:
+  repository: ""          # e.g. my-registry/my-spark-app
+  tag: "latest"
+  pullPolicy: IfNotPresent
+  pullSecrets: []          # list of imagePullSecret names
+
+# ─────────────────────────────────────────────
+# Spark job definition
+# ─────────────────────────────────────────────
+job:
+  type: Scala              # Scala | Python | Java | R
+  sparkVersion: "3.5.0"
+  mainClass: ""            # e.g. com.example.WordCount   (not needed for Python)
+  mainApplicationFile: ""  # e.g. local:///opt/spark/jars/my-app.jar  OR  local:///app/main.py
+  arguments: []            # list of string args passed to main
+  mode: cluster            # cluster | client
+  batchScheduler: ""       # optional: volcano / yunikorn
+
+# ─────────────────────────────────────────────
+# Driver pod configuration
+# ─────────────────────────────────────────────
+driver:
+  cores: 1
+  coreLimit: "1200m"
+  memory: "1g"
+  memoryOverhead: ""       # optional, e.g. "512m"
+  labels: {}
+  annotations: {}
+  env: []                  # list of {name, value} or {name, valueFrom}
+  envFrom: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podSecurityContext: {}
+  securityContext: {}
+  volumeMounts: []
+  javaOptions: ""
+  # KubernetesDriverSpec extras
+  podName: ""
+  serviceAnnotations: {}
+
+# ─────────────────────────────────────────────
+# Executor pod configuration
+# ─────────────────────────────────────────────
+executor:
+  instances: 1
+  cores: 1
+  coreLimit: "1200m"
+  memory: "1g"
+  memoryOverhead: ""
+  labels: {}
+  annotations: {}
+  env: []
+  envFrom: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podSecurityContext: {}
+  securityContext: {}
+  volumeMounts: []
+  javaOptions: ""
+
+# ─────────────────────────────────────────────
+# Spark & Hadoop configuration
+# ─────────────────────────────────────────────
+sparkConf: {}
+  # spark.sql.shuffle.partitions: "200"
+  # spark.eventLog.enabled: "true"
+  # spark.eventLog.dir: "s3a://my-bucket/spark-logs"
+
+hadoopConf: {}
+  # fs.s3a.endpoint: "s3.amazonaws.com"
+
+# ─────────────────────────────────────────────
+# Volumes shared between driver & executor
+# ─────────────────────────────────────────────
+volumes: []
+# - name: spark-local-dir
+#   hostPath:
+#     path: /tmp/spark-local
+
+# ─────────────────────────────────────────────
+# Restart policy
+# ─────────────────────────────────────────────
+restartPolicy:
+  type: Never              # Never | OnFailure | Always
+  onFailureRetries: 3
+  onFailureRetryInterval: 10
+  onSubmissionFailureRetries: 5
+  onSubmissionFailureRetryInterval: 20
+
+# ─────────────────────────────────────────────
+# Service account (created by this chart)
+# ─────────────────────────────────────────────
+serviceAccount:
+  create: true
+  name: ""                 # defaults to fullname
+  annotations: {}
+  automountToken: true
+
+# RBAC – grant driver SA the edit role in its namespace
+rbac:
+  create: true
+
+# ─────────────────────────────────────────────
+# Monitoring / UI
+# ─────────────────────────────────────────────
+monitoring:
+  enabled: false
+  exposeDriverMetrics: true
+  exposeExecutorMetrics: true
+  prometheus:
+    jmxExporterJar: "/prometheus/jmx_prometheus_javaagent.jar"
+    port: 8090
+
+sparkUIOptions:
+  enabled: false
+  servicePort: 4040
+  serviceType: ClusterIP
+  ingressAnnotations: {}
+  ingressHost: ""
+
+# ─────────────────────────────────────────────
+# Extra labels / annotations on SparkApplication
+# ─────────────────────────────────────────────
+commonLabels: {}
+commonAnnotations: {}

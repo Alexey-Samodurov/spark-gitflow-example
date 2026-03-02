@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: spark-jobs
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: spark-gitflow
+spec:
+  description: "Spark jobs deployed via Helm + spark-operator"
+
+  # Разрешённые source-репозитории (замените на реальный URL)
+  sourceRepos:
+    - "*"
+
+  # Разрешённые целевые кластеры и namespace-ы
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: spark-jobs
+
+  # Разрешённые ресурсы
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+
+  namespaceResourceWhitelist:
+    - group: "sparkoperator.k8s.io"
+      kind: SparkApplication
+    - group: ""
+      kind: ServiceAccount
+    - group: "rbac.authorization.k8s.io"
+      kind: Role
+    - group: "rbac.authorization.k8s.io"
+      kind: RoleBinding
+
+  # Политики ролей внутри проекта
+  roles:
+    - name: admin
+      description: Full access to spark-jobs project
+      policies:
+        - p, proj:spark-jobs:admin, applications, *, spark-jobs/*, allow
+      groups:
+        - data-platform-team

@@ -1,0 +1,199 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: {{ include "spark-job.fullname" . }}
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "spark-job.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.job.type }}
+  mode: {{ .Values.job.mode }}
+  sparkVersion: {{ .Values.job.sparkVersion | quote }}
+  image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag | quote }}
+  imagePullPolicy: {{ .Values.image.pullPolicy }}
+  {{- with .Values.image.pullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- if .Values.job.mainClass }}
+  mainClass: {{ .Values.job.mainClass | quote }}
+  {{- end }}
+  mainApplicationFile: {{ .Values.job.mainApplicationFile | quote }}
+
+  {{- with .Values.job.arguments }}
+  arguments:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.sparkConf }}
+  sparkConf:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.hadoopConf }}
+  hadoopConf:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.volumes }}
+  volumes:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- if .Values.job.batchScheduler }}
+  batchScheduler: {{ .Values.job.batchScheduler | quote }}
+  {{- end }}
+
+  # ── Driver ──────────────────────────────────────────────────────
+  driver:
+    cores: {{ .Values.driver.cores }}
+    {{- if .Values.driver.coreLimit }}
+    coreLimit: {{ .Values.driver.coreLimit | quote }}
+    {{- end }}
+    memory: {{ .Values.driver.memory | quote }}
+    {{- if .Values.driver.memoryOverhead }}
+    memoryOverhead: {{ .Values.driver.memoryOverhead | quote }}
+    {{- end }}
+    serviceAccount: {{ include "spark-job.serviceAccountName" . }}
+    {{- if .Values.driver.podName }}
+    podName: {{ .Values.driver.podName | quote }}
+    {{- end }}
+    labels:
+      {{- include "spark-job.selectorLabels" . | nindent 6 }}
+      spark-role: driver
+      {{- with .Values.driver.labels }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+    {{- with .Values.driver.annotations }}
+    annotations:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.driver.env }}
+    env:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.driver.envFrom }}
+    envFrom:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.driver.volumeMounts }}
+    volumeMounts:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.driver.nodeSelector }}
+    nodeSelector:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.driver.tolerations }}
+    tolerations:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.driver.affinity }}
+    affinity:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.driver.podSecurityContext }}
+    podSecurityContext:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.driver.securityContext }}
+    securityContext:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- if .Values.driver.javaOptions }}
+    javaOptions: {{ .Values.driver.javaOptions | quote }}
+    {{- end }}
+    {{- if .Values.monitoring.enabled }}
+    ports:
+      - name: jmx
+        containerPort: {{ .Values.monitoring.prometheus.port }}
+        protocol: TCP
+    {{- end }}
+
+  # ── Executor ─────────────────────────────────────────────────────
+  executor:
+    instances: {{ .Values.executor.instances }}
+    cores: {{ .Values.executor.cores }}
+    {{- if .Values.executor.coreLimit }}
+    coreLimit: {{ .Values.executor.coreLimit | quote }}
+    {{- end }}
+    memory: {{ .Values.executor.memory | quote }}
+    {{- if .Values.executor.memoryOverhead }}
+    memoryOverhead: {{ .Values.executor.memoryOverhead | quote }}
+    {{- end }}
+    labels:
+      {{- include "spark-job.selectorLabels" . | nindent 6 }}
+      spark-role: executor
+      {{- with .Values.executor.labels }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+    {{- with .Values.executor.annotations }}
+    annotations:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.executor.env }}
+    env:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.executor.envFrom }}
+    envFrom:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.executor.volumeMounts }}
+    volumeMounts:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.executor.nodeSelector }}
+    nodeSelector:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.executor.tolerations }}
+    tolerations:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.executor.affinity }}
+    affinity:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.executor.podSecurityContext }}
+    podSecurityContext:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.executor.securityContext }}
+    securityContext:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- if .Values.executor.javaOptions }}
+    javaOptions: {{ .Values.executor.javaOptions | quote }}
+    {{- end }}
+    {{- if .Values.monitoring.enabled }}
+    ports:
+      - name: jmx
+        containerPort: {{ .Values.monitoring.prometheus.port }}
+        protocol: TCP
+    {{- end }}
+
+  # ── Restart policy ───────────────────────────────────────────────
+  restartPolicy:
+    type: {{ .Values.restartPolicy.type }}
+    {{- if ne .Values.restartPolicy.type "Never" }}
+    onFailureRetries: {{ .Values.restartPolicy.onFailureRetries }}
+    onFailureRetryInterval: {{ .Values.restartPolicy.onFailureRetryInterval }}
+    onSubmissionFailureRetries: {{ .Values.restartPolicy.onSubmissionFailureRetries }}
+    onSubmissionFailureRetryInterval: {{ .Values.restartPolicy.onSubmissionFailureRetryInterval }}
+    {{- end }}
+
+  # ── Monitoring ───────────────────────────────────────────────────
+  {{- if .Values.monitoring.enabled }}
+  monitoring:
+    exposeDriverMetrics: {{ .Values.monitoring.exposeDriverMetrics }}
+    exposeExecutorMetrics: {{ .Values.monitoring.exposeExecutorMetrics }}
+    prometheus:
+      jmxExporterJar: {{ .Values.monitoring.prometheus.jmxExporterJar | quote }}
+      port: {{ .Values.monitoring.prometheus.port }}
+  {{- end }}

@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: spark-word-count
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: spark-gitflow
+    spark-job: word-count
+  # Удалять SparkApplication при удалении ArgoCD Application
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: spark-jobs
+
+  source:
+    # Замените на реальный URL вашего репозитория
+    repoURL: https://github.com/YOUR_ORG/spark-gitflow-example.git
+    targetRevision: master
+    path: jobs/word-count
+    helm:
+      valueFiles:
+        - values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: spark-jobs
+
+  syncPolicy:
+    automated:
+      prune: true        # удалять ресурсы, убранные из git
+      selfHeal: true     # восстанавливать ручные изменения в кластере
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

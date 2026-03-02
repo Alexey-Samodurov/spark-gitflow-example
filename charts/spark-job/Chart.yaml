@@ -1,0 +1,14 @@
+apiVersion: v2
+name: spark-job
+description: Base Helm chart for running Apache Spark jobs via spark-operator SparkApplication CRD
+type: library
+version: 0.1.0
+appVersion: "3.5.0"
+keywords:
+  - spark
+  - spark-operator
+  - data-engineering
+maintainers:
+  - name: data-platform-team
+annotations:
+  spark-operator/crd-version: "sparkoperator.k8s.io/v1beta2"

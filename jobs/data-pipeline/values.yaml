@@ -1,0 +1,36 @@
+sparkJob:
+  image:
+    repository: my-registry/data-pipeline
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  job:
+    type: Python
+    sparkVersion: "3.5.0"
+    mainApplicationFile: "local:///app/main.py"
+    arguments: []
+
+  driver:
+    cores: 1
+    coreLimit: "1200m"
+    memory: "1g"
+    env: []
+
+  executor:
+    instances: 2
+    cores: 2
+    memory: "2g"
+
+  sparkConf:
+    spark.sql.adaptive.enabled: "true"
+    spark.sql.shuffle.partitions: "10"
+
+  restartPolicy:
+    type: OnFailure
+    onFailureRetries: 3
+    onFailureRetryInterval: 10
+    onSubmissionFailureRetries: 5
+    onSubmissionFailureRetryInterval: 20
+
+  serviceAccount:
+    create: true
