@@ -1,6 +1,6 @@
 sparkjob:
   image:
-    repository: spark
+    repository: apache/spark
     tag: "3.5.0-scala2.12-java11-python3-ubuntu"
     pullPolicy: IfNotPresent
 
