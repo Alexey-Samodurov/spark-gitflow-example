@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "spark-job-apache values",
+  "type": "object",
+  "required": ["image", "job"],
+  "properties": {
+    "image": {
+      "type": "object",
+      "required": ["repository"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "tag":        { "type": "string" },
+        "pullPolicy": { "type": "string", "enum": ["Always", "IfNotPresent", "Never"] }
+      }
+    },
+    "job": {
+      "type": "object",
+      "required": ["mainApplicationFile"],
+      "properties": {
+        "type":                { "type": "string", "enum": ["Scala", "Java", "Python", "R"] },
+        "sparkVersion":        { "type": "string" },
+        "mainClass":           { "type": "string" },
+        "mainApplicationFile": { "type": "string", "minLength": 1 }
+      }
+    },
+    "driver": {
+      "type": "object",
+      "properties": {
+        "cores":   { "type": "integer", "minimum": 1 },
+        "memory":  { "type": "string" }
+      }
+    },
+    "executor": {
+      "type": "object",
+      "properties": {
+        "instances": { "type": "integer", "minimum": 1 },
+        "cores":     { "type": "integer", "minimum": 1 },
+        "memory":    { "type": "string" }
+      }
+    },
+    "restartPolicy": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["Never", "OnFailure", "Always"] }
+      }
+    }
+  }
+}

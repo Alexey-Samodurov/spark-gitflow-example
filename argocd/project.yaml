@@ -31,6 +31,14 @@ spec:
       kind: Role
     - group: "rbac.authorization.k8s.io"
       kind: RoleBinding
+    - group: "sparkoperator.k8s.io"
+      kind: SparkApplication
+    - group: "spark.apache.org"
+      kind: SparkApplication
+    - group: "spark.apache.org"
+      kind: SparkCluster
+    - group: ""
+      kind: ServiceAccount
 
   # Политики ролей внутри проекта
   roles:

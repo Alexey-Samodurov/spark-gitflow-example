@@ -1,0 +1,112 @@
+# ─────────────────────────────────────────────
+# Global / metadata
+# ─────────────────────────────────────────────
+nameOverride: ""
+fullnameOverride: ""
+
+## Namespace is controlled by ArgoCD destination; set here only for local helm install
+namespace: ""
+
+# ─────────────────────────────────────────────
+# Container image
+# ─────────────────────────────────────────────
+image:
+  repository: ""          # e.g. apache/spark
+  tag: "latest"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+# ─────────────────────────────────────────────
+# Spark application definition
+# ─────────────────────────────────────────────
+job:
+  type: Scala              # Scala | Python | Java | R
+  sparkVersion: "3.5.0"
+  mainClass: ""            # e.g. org.apache.spark.examples.SparkPi
+  mainApplicationFile: ""  # e.g. local:///opt/spark/examples/jars/spark-examples.jar
+  arguments: []
+  pythonVersion: ""        # optional: "3" for PySpark jobs
+  jars: []                 # additional jar dependencies
+  pyFiles: []              # additional .py / .zip files
+
+# ─────────────────────────────────────────────
+# Runtime versions (Apache operator specific)
+# ─────────────────────────────────────────────
+runtimeVersions:
+  sparkVersion: "3.5.0"
+
+# ─────────────────────────────────────────────
+# Driver pod configuration
+# ─────────────────────────────────────────────
+driver:
+  cores: 1
+  coreLimit: ""            # optional, e.g. "1200m"
+  memory: "1g"
+  memoryOverhead: ""
+  labels: {}
+  annotations: {}
+  env: []
+  envFrom: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  volumeMounts: []
+  javaOptions: ""
+  podTemplateSpec: {}      # optional: full pod template override
+
+# ─────────────────────────────────────────────
+# Executor pod configuration
+# ─────────────────────────────────────────────
+executor:
+  instances: 1
+  cores: 1
+  coreLimit: ""
+  memory: "1g"
+  memoryOverhead: ""
+  labels: {}
+  annotations: {}
+  env: []
+  envFrom: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  volumeMounts: []
+  javaOptions: ""
+  podTemplateSpec: {}
+
+# ─────────────────────────────────────────────
+# Spark configuration
+# ─────────────────────────────────────────────
+sparkConf: {}
+  # spark.sql.shuffle.partitions: "200"
+  # spark.eventLog.enabled: "true"
+
+# ─────────────────────────────────────────────
+# Volumes shared between driver & executor
+# ─────────────────────────────────────────────
+volumes: []
+
+# ─────────────────────────────────────────────
+# Restart policy
+# ─────────────────────────────────────────────
+restartPolicy:
+  type: Never              # Never | OnFailure | Always
+  maxRetryAttempts: 3
+
+# ─────────────────────────────────────────────
+# Service account
+# ─────────────────────────────────────────────
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+  automountToken: true
+
+rbac:
+  create: true
+
+# ─────────────────────────────────────────────
+# Extra labels / annotations on SparkApplication
+# ─────────────────────────────────────────────
+commonLabels: {}
+commonAnnotations: {}

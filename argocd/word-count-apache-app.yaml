@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: spark-word-count-apache
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: spark-gitflow
+    spark-job: word-count-apache
+    spark-operator: apache
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: spark-jobs
+
+  source:
+    repoURL: https://github.com/Alexey-Samodurov/spark-gitflow-example
+    targetRevision: master
+    path: jobs/word-count-apache
+    helm:
+      valueFiles:
+        - values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: spark-jobs
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+
