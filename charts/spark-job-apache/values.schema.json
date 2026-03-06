@@ -9,18 +9,22 @@
       "required": ["repository"],
       "properties": {
         "repository": { "type": "string", "minLength": 1 },
-        "tag":        { "type": "string" },
-        "pullPolicy": { "type": "string", "enum": ["Always", "IfNotPresent", "Never"] }
+        "tag":        { "type": "string" }
       }
     },
     "job": {
       "type": "object",
       "required": ["mainApplicationFile"],
       "properties": {
-        "type":                { "type": "string", "enum": ["Scala", "Java", "Python", "R"] },
-        "sparkVersion":        { "type": "string" },
         "mainClass":           { "type": "string" },
-        "mainApplicationFile": { "type": "string", "minLength": 1 }
+        "mainApplicationFile": { "type": "string", "minLength": 1 },
+        "pyFiles":             { "type": "string" }
+      }
+    },
+    "runtimeVersions": {
+      "type": "object",
+      "properties": {
+        "sparkVersion": { "type": "string" }
       }
     },
     "driver": {
@@ -38,10 +42,24 @@
         "memory":    { "type": "string" }
       }
     },
-    "restartPolicy": {
+    "applicationTolerations": {
       "type": "object",
       "properties": {
-        "type": { "type": "string", "enum": ["Never", "OnFailure", "Always"] }
+        "resourceRetainPolicy": {
+          "type": "string",
+          "enum": ["Never", "OnFailure", "Always"]
+        },
+        "restartConfig": { "type": "object" },
+        "instanceConfig": { "type": "object" },
+        "applicationTimeoutConfig": { "type": "object" }
+      }
+    },
+    "sparkConf": { "type": "object" },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": { "type": "boolean" },
+        "name":   { "type": "string" }
       }
     }
   }

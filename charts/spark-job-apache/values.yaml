@@ -9,99 +9,94 @@ namespace: ""
 
 # ─────────────────────────────────────────────
 # Container image
+# Passed to CRD via sparkConf:
+#   spark.kubernetes.container.image
 # ─────────────────────────────────────────────
 image:
   repository: ""          # e.g. apache/spark
   tag: "latest"
-  pullPolicy: IfNotPresent
-  pullSecrets: []
 
 # ─────────────────────────────────────────────
-# Spark application definition
+# Spark job definition
 # ─────────────────────────────────────────────
 job:
-  type: Scala              # Scala | Python | Java | R
-  sparkVersion: "3.5.0"
   mainClass: ""            # e.g. org.apache.spark.examples.SparkPi
   mainApplicationFile: ""  # e.g. local:///opt/spark/examples/jars/spark-examples.jar
-  arguments: []
-  pythonVersion: ""        # optional: "3" for PySpark jobs
-  jars: []                 # additional jar dependencies
-  pyFiles: []              # additional .py / .zip files
+  pyFiles: ""              # optional: comma-separated Python files / zips
 
 # ─────────────────────────────────────────────
-# Runtime versions (Apache operator specific)
+# Runtime versions (required by Apache operator)
 # ─────────────────────────────────────────────
 runtimeVersions:
   sparkVersion: "3.5.0"
 
 # ─────────────────────────────────────────────
 # Driver pod configuration
+# Mapped to sparkConf spark.driver.* properties
 # ─────────────────────────────────────────────
 driver:
   cores: 1
-  coreLimit: ""            # optional, e.g. "1200m"
   memory: "1g"
-  memoryOverhead: ""
-  labels: {}
-  annotations: {}
-  env: []
-  envFrom: []
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
-  volumeMounts: []
-  javaOptions: ""
-  podTemplateSpec: {}      # optional: full pod template override
 
 # ─────────────────────────────────────────────
 # Executor pod configuration
+# Mapped to sparkConf spark.executor.* properties
 # ─────────────────────────────────────────────
 executor:
   instances: 1
   cores: 1
-  coreLimit: ""
   memory: "1g"
-  memoryOverhead: ""
-  labels: {}
-  annotations: {}
-  env: []
-  envFrom: []
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
-  volumeMounts: []
-  javaOptions: ""
-  podTemplateSpec: {}
 
 # ─────────────────────────────────────────────
-# Spark configuration
+# Application tolerations
+# Controls restart, resource retain, scaling
+# ─────────────────────────────────────────────
+applicationTolerations:
+  # What to do with K8s resources after app terminates
+  # Never — delete all pods/services after completion
+  # OnFailure — retain on failure for debugging
+  # Always — always retain
+  resourceRetainPolicy: Never
+
+  # Restart configuration
+  restartConfig: {}
+    # restartPolicy: OnFailure          # Never | OnFailure | Always | OnInfrastructureFailure
+    # maxRestartAttempts: 3
+    # restartBackoffMillis: 10000
+
+  # Dynamic allocation / instance config
+  instanceConfig: {}
+    # initExecutors: 1
+    # minExecutors: 1
+    # maxExecutors: 3
+
+  # Timeout configuration
+  applicationTimeoutConfig: {}
+    # driverStartTimeoutMillis: 300000
+    # driverReadyTimeoutMillis: 300000
+    # executorStartTimeoutMillis: 300000
+
+# ─────────────────────────────────────────────
+# Additional Spark configuration (spark.* properties)
+# These are merged with auto-generated driver/executor
+# and image configs below
 # ─────────────────────────────────────────────
 sparkConf: {}
   # spark.sql.shuffle.partitions: "200"
   # spark.eventLog.enabled: "true"
+  # spark.eventLog.dir: "s3a://my-bucket/spark-logs"
+  # spark.dynamicAllocation.enabled: "true"
 
 # ─────────────────────────────────────────────
-# Volumes shared between driver & executor
-# ─────────────────────────────────────────────
-volumes: []
-
-# ─────────────────────────────────────────────
-# Restart policy
-# ─────────────────────────────────────────────
-restartPolicy:
-  type: Never              # Never | OnFailure | Always
-  maxRetryAttempts: 3
-
-# ─────────────────────────────────────────────
-# Service account
+# Service account (created by this chart)
 # ─────────────────────────────────────────────
 serviceAccount:
   create: true
-  name: ""
+  name: ""                 # defaults to fullname
   annotations: {}
   automountToken: true
 
+# RBAC – grant driver SA the edit role in its namespace
 rbac:
   create: true
 

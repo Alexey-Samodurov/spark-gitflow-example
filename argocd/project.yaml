@@ -1,3 +1,4 @@
+
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -8,29 +9,18 @@ metadata:
 spec:
   description: "Spark jobs deployed via Helm + spark-operator"
 
-  # Разрешённые source-репозитории (замените на реальный URL)
   sourceRepos:
     - "*"
 
-  # Разрешённые целевые кластеры и namespace-ы
   destinations:
     - server: https://kubernetes.default.svc
       namespace: spark-jobs
 
-  # Разрешённые ресурсы
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
 
   namespaceResourceWhitelist:
-    - group: "sparkoperator.k8s.io"
-      kind: SparkApplication
-    - group: ""
-      kind: ServiceAccount
-    - group: "rbac.authorization.k8s.io"
-      kind: Role
-    - group: "rbac.authorization.k8s.io"
-      kind: RoleBinding
     - group: "sparkoperator.k8s.io"
       kind: SparkApplication
     - group: "spark.apache.org"
@@ -39,8 +29,11 @@ spec:
       kind: SparkCluster
     - group: ""
       kind: ServiceAccount
+    - group: "rbac.authorization.k8s.io"
+      kind: Role
+    - group: "rbac.authorization.k8s.io"
+      kind: RoleBinding
 
-  # Политики ролей внутри проекта
   roles:
     - name: admin
       description: Full access to spark-jobs project

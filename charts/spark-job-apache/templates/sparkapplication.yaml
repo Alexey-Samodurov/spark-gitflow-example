@@ -1,4 +1,4 @@
-apiVersion: spark.apache.org/v1beta1
+apiVersion: spark.apache.org/v1
 kind: SparkApplication
 metadata:
   name: {{ include "spark-job-apache.fullname" . }}
@@ -10,156 +10,46 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  # ── Main class & jars ────────────────────────────────────────────
+  {{- if .Values.job.mainClass }}
+  mainClass: {{ .Values.job.mainClass | quote }}
+  {{- end }}
+  jars: {{ .Values.job.mainApplicationFile | quote }}
+  {{- if .Values.job.pyFiles }}
+  pyFiles: {{ .Values.job.pyFiles | quote }}
+  {{- end }}
+
   # ── Runtime versions ─────────────────────────────────────────────
   runtimeVersions:
     sparkVersion: {{ .Values.runtimeVersions.sparkVersion | quote }}
 
-  # ── Application spec ─────────────────────────────────────────────
-  applicationSpec:
-    type: {{ .Values.job.type }}
-    image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag | quote }}
-    imagePullPolicy: {{ .Values.image.pullPolicy }}
-    {{- with .Values.image.pullSecrets }}
-    imagePullSecrets:
+  # ── Application tolerations ──────────────────────────────────────
+  applicationTolerations:
+    resourceRetainPolicy: {{ .Values.applicationTolerations.resourceRetainPolicy }}
+    {{- with .Values.applicationTolerations.restartConfig }}
+    restartConfig:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.applicationTolerations.instanceConfig }}
+    instanceConfig:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.applicationTolerations.applicationTimeoutConfig }}
+    applicationTimeoutConfig:
       {{- toYaml . | nindent 6 }}
     {{- end }}
 
-    {{- if .Values.job.mainClass }}
-    mainClass: {{ .Values.job.mainClass | quote }}
-    {{- end }}
-    mainApplicationFile: {{ .Values.job.mainApplicationFile | quote }}
-
-    {{- with .Values.job.arguments }}
-    arguments:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
-
-    {{- if .Values.job.pythonVersion }}
-    pythonVersion: {{ .Values.job.pythonVersion | quote }}
-    {{- end }}
-
-    {{- with .Values.job.jars }}
-    jars:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
-
-    {{- with .Values.job.pyFiles }}
-    pyFiles:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
-
+  # ── Spark configuration ──────────────────────────────────────────
+  # Image, service account, driver/executor resources are set here
+  # along with any user-provided sparkConf overrides
+  sparkConf:
+    spark.kubernetes.container.image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag | quote }}
+    spark.kubernetes.authenticate.driver.serviceAccountName: {{ include "spark-job-apache.serviceAccountName" . }}
+    spark.driver.cores: {{ .Values.driver.cores | quote }}
+    spark.driver.memory: {{ .Values.driver.memory | quote }}
+    spark.executor.instances: {{ .Values.executor.instances | quote }}
+    spark.executor.cores: {{ .Values.executor.cores | quote }}
+    spark.executor.memory: {{ .Values.executor.memory | quote }}
     {{- with .Values.sparkConf }}
-    sparkConf:
-      {{- toYaml . | nindent 6 }}
+    {{- toYaml . | nindent 4 }}
     {{- end }}
-
-    {{- with .Values.volumes }}
-    volumes:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
-
-    # ── Driver ───────────────────────────────────────────────────
-    driverSpec:
-      cores: {{ .Values.driver.cores }}
-      {{- if .Values.driver.coreLimit }}
-      coreLimit: {{ .Values.driver.coreLimit | quote }}
-      {{- end }}
-      memory: {{ .Values.driver.memory | quote }}
-      {{- if .Values.driver.memoryOverhead }}
-      memoryOverhead: {{ .Values.driver.memoryOverhead | quote }}
-      {{- end }}
-      serviceAccountName: {{ include "spark-job-apache.serviceAccountName" . }}
-      labels:
-        {{- include "spark-job-apache.selectorLabels" . | nindent 8 }}
-        {{- with .Values.driver.labels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-      {{- with .Values.driver.annotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.driver.env }}
-      env:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.driver.envFrom }}
-      envFrom:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.driver.volumeMounts }}
-      volumeMounts:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.driver.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.driver.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.driver.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.driver.javaOptions }}
-      javaOptions: {{ .Values.driver.javaOptions | quote }}
-      {{- end }}
-
-    # ── Executor ─────────────────────────────────────────────────
-    executorSpec:
-      instances: {{ .Values.executor.instances }}
-      cores: {{ .Values.executor.cores }}
-      {{- if .Values.executor.coreLimit }}
-      coreLimit: {{ .Values.executor.coreLimit | quote }}
-      {{- end }}
-      memory: {{ .Values.executor.memory | quote }}
-      {{- if .Values.executor.memoryOverhead }}
-      memoryOverhead: {{ .Values.executor.memoryOverhead | quote }}
-      {{- end }}
-      labels:
-        {{- include "spark-job-apache.selectorLabels" . | nindent 8 }}
-        {{- with .Values.executor.labels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-      {{- with .Values.executor.annotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.executor.env }}
-      env:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.executor.envFrom }}
-      envFrom:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.executor.volumeMounts }}
-      volumeMounts:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.executor.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.executor.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.executor.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.executor.javaOptions }}
-      javaOptions: {{ .Values.executor.javaOptions | quote }}
-      {{- end }}
-
-  # ── Restart policy ─────────────────────────────────────────────
-  {{- if ne .Values.restartPolicy.type "Never" }}
-  restartPolicy:
-    type: {{ .Values.restartPolicy.type }}
-    {{- if .Values.restartPolicy.maxRetryAttempts }}
-    maxRetryAttempts: {{ .Values.restartPolicy.maxRetryAttempts }}
-    {{- end }}
-  {{- end }}
-

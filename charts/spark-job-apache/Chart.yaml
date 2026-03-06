@@ -12,5 +12,4 @@ keywords:
 maintainers:
   - name: data-platform-team
 annotations:
-  spark-operator/crd-version: "spark.apache.org/v1beta1"
-
+  spark-operator/crd-version: "spark.apache.org/v1"
