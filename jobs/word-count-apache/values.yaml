@@ -6,6 +6,8 @@ sparkjob:
   job:
     mainClass: org.apache.spark.examples.JavaWordCount
     mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.12-3.5.0.jar"
+    arguments:
+      - "file:///opt/spark/RELEASE"
 
   runtimeVersions:
     sparkVersion: "3.5.0"
