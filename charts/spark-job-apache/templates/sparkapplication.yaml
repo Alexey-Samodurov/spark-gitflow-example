@@ -19,6 +19,11 @@ spec:
   pyFiles: {{ .Values.job.pyFiles | quote }}
   {{- end }}
 
+  {{- with .Values.job.arguments }}
+  driverArgs:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
   # ── Runtime versions ─────────────────────────────────────────────
   runtimeVersions:
     sparkVersion: {{ .Values.runtimeVersions.sparkVersion | quote }}

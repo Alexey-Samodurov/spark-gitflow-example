@@ -22,6 +22,7 @@ image:
 job:
   mainClass: ""            # e.g. org.apache.spark.examples.SparkPi
   mainApplicationFile: ""  # e.g. local:///opt/spark/examples/jars/spark-examples.jar
+  arguments: []            # Arguments passed to main class, e.g. ["file:///opt/spark/RELEASE"]
   pyFiles: ""              # optional: comma-separated Python files / zips
 
 # ─────────────────────────────────────────────
